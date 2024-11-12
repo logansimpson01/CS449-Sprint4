@@ -1,3 +1,5 @@
+# sos_game.py
+
 from tkinter import *
 from tkinter import simpledialog
 from math import atan2, degrees
@@ -11,14 +13,9 @@ class Player(ABC):
     
     @abstractmethod
     def make_move(self, game_logic):
-        """
-        Make a move on the game board
-        Returns: (row, col, letter) or None if no move is possible
-        """
         pass
     
     def set_letter(self, letter):
-        """Set the current letter choice (S or O)"""
         self.current_letter = letter
     
     @property
@@ -30,8 +27,6 @@ class HumanPlayer(Player):
         super().__init__(color)
     
     def make_move(self, game_logic):
-        # Human moves are handled by GUI clicks
-        # This method won't be called directly
         return None
 
 class ComputerPlayer(Player):
@@ -39,7 +34,6 @@ class ComputerPlayer(Player):
         super().__init__(color)
     
     def make_move(self, game_logic):
-        """Implement computer player strategy"""
         valid_moves = game_logic.get_valid_moves()
         if not valid_moves:
             return None
@@ -66,21 +60,21 @@ class ComputerPlayer(Player):
         
         # Strategy 4: Random move with weighted letter choice
         move = random.choice(valid_moves)
-        letter = random.choice(['S', 'S', 'O'])  # Prefer 'S' slightly
+        letter = random.choice(['S', 'S', 'O'])  # Prefer 'S'
         return move[0], move[1], letter
 
 class SOSGameLogic:
     def __init__(self, board_size):
         self.board_size = board_size
         self.sos_lines = []
-        self.blue_player = HumanPlayer("Blue")  # Default to human players
+        self.blue_player = HumanPlayer("Blue")  
         self.red_player = HumanPlayer("Red")
         self.reset_game()
         self.game_mode = "Simple"
     
     def reset_game(self):
         self.board = [['' for _ in range(self.board_size)] for _ in range(self.board_size)]
-        self.current_player = self.blue_player  # Now stores Player object
+        self.current_player = self.blue_player  
         self.game_over = False
         self.blue_score = 0
         self.red_score = 0
@@ -151,10 +145,9 @@ class SOSGameLogic:
         return all(cell != '' for row in self.board for cell in row)
 
     def get_current_player_type(self):
-        return self.current_player.player_type  # Now uses Player object's property
+        return self.current_player.player_type  
 
     def get_valid_moves(self):
-        """Returns list of valid moves as (row, col) tuples"""
         moves = []
         for row in range(self.board_size):
             for col in range(self.board_size):
@@ -163,7 +156,6 @@ class SOSGameLogic:
         return moves
 
     def check_potential_sos(self, row, col, letter):
-        """Check if placing letter at position would form an SOS"""
         # Temporarily place the letter
         original = self.board[row][col]
         self.board[row][col] = letter
@@ -192,11 +184,11 @@ class SOSGUI:
         dialog.resizable(False, False)  # Prevent resizing
         pass
     
-        # Main frame with padding
+        
         main_frame = Frame(dialog, padx=20, pady=20)
         main_frame.pack(expand=True, fill=BOTH)
     
-        # Title at the top
+        # Title 
         Label(main_frame, text="SOS Game Setup", 
               font=("Helvetica", 16, "bold")).pack(pady=(0, 20))
     
@@ -222,7 +214,7 @@ class SOSGUI:
         Radiobutton(mode_frame, text="General Game", variable=mode_var, 
                     value="General", font=("Helvetica", 11)).pack(pady=5)
     
-        # Player Selection Section
+        # Player Selection
         players_frame = LabelFrame(main_frame, text="Player Selection", 
                                  font=("Helvetica", 12, "bold"), pady=10, padx=10)
         players_frame.pack(fill=X, pady=10)
@@ -248,7 +240,7 @@ class SOSGUI:
         Radiobutton(players_frame, text="Computer Player", variable=red_player_var, 
                     value="Computer", font=("Helvetica", 11)).pack()
     
-        # Start Game Button
+        # Start Game 
         def start_game():
             self.board_size = size_var.get()
             self.game_mode.set(mode_var.get())
@@ -263,14 +255,14 @@ class SOSGUI:
     
         # Set dialog size and position
         dialog_width = 400
-        dialog_height = 700  # Increased height to fit all elements comfortably
+        dialog_height = 700  
         screen_width = dialog.winfo_screenwidth()
         screen_height = dialog.winfo_screenheight()
         x = (screen_width - dialog_width) // 2
         y = (screen_height - dialog_height) // 2
         dialog.geometry(f'{dialog_width}x{dialog_height}+{x}+{y}')
     
-        # Wait for the dialog
+        
         self.master.wait_window(dialog)
 
     def initialize_game(self):
@@ -286,15 +278,13 @@ class SOSGUI:
         # Reset game to ensure proper initialization
         self.game_logic.reset_game()
     
-        # ... [rest of window setup remains the same] ...
     
         self.create_board()
         self.create_info_panel()
     
-        # Update UI before making computer move
+        # Update UI 
         self.update_ui()
     
-        # Schedule computer move if it's first
         if isinstance(self.game_logic.current_player, ComputerPlayer):
             self.master.after(1000, self.make_computer_move)
 
@@ -332,8 +322,8 @@ class SOSGUI:
         # Game information
         self.create_game_info(info_frame)
         
-        # Control buttons - Moving these to be more visible
-        control_frame = Frame(self.master)  # Create a separate frame for controls
+        # Control buttons
+        control_frame = Frame(self.master)  
         control_frame.grid(row=3, column=0, columnspan=self.board_size, pady=10)
         
         Button(control_frame, 
@@ -375,7 +365,6 @@ class SOSGUI:
                                font=("Helvetica", 12))
         self.score_label.grid(row=3, column=1, columnspan=2)
 
-        # Store the mode label as an instance variable so we can update it
         self.mode_label = Label(parent, text=f"Game Mode: {self.game_mode.get()}", 
                               font=("Helvetica", 12))
         self.mode_label.grid(row=4, column=1, columnspan=2)
@@ -385,7 +374,7 @@ class SOSGUI:
         button_frame.grid(row=5, column=0, columnspan=4, pady=10)
 
         buttons = [
-            ("New Game", self.reset_game),  # Added New Game button that calls reset_game
+            ("New Game", self.reset_game),  
             ("Change Mode", self.change_game_mode)
         ]
 
@@ -396,14 +385,13 @@ class SOSGUI:
     def on_canvas_click(self, event):
         if not self.game_logic.game_over:
         # Only process clicks if it's a human player's turn
-            if isinstance(self.game_logic.current_player, HumanPlayer):  # Updated check
+            if isinstance(self.game_logic.current_player, HumanPlayer):  
                 col = event.x // self.cell_size
                 row = event.y // self.cell_size
                 if 0 <= row < self.board_size and 0 <= col < self.board_size:
                     self.make_move(row, col)
 
     def make_move(self, row, col):
-        """Handle both human and computer moves"""
         current_player = self.game_logic.current_player
         letter = self.blue_choice.get() if current_player.color == "Blue" else self.red_choice.get()
         current_player.set_letter(letter)
@@ -416,13 +404,11 @@ class SOSGUI:
             self.draw_sos_lines(new_sos_lines, current_player.color)
             self.update_ui()
         
-            # Schedule next computer move if applicable
             if (not self.game_logic.game_over and 
                 isinstance(self.game_logic.current_player, ComputerPlayer)):
                 self.master.after(1000, self.make_computer_move)
     
     def make_computer_move(self):
-        """Handle computer player's turn"""
         if self.game_logic.game_over:
             return
         
@@ -506,9 +492,8 @@ class SOSGUI:
         dialog.title("Change Game Settings")
         dialog.transient(self.master)
         dialog.grab_set()
-        dialog.geometry("350x500")  # Increased height for new controls
+        dialog.geometry("350x500")  
     
-        # Increase dialog size to accommodate new controls
         dialog_width = 350
         dialog_height = 450
         screen_width = dialog.winfo_screenwidth()
@@ -540,12 +525,10 @@ class SOSGUI:
         Radiobutton(dialog, text="Human", variable=red_player, value="Human").pack()
         Radiobutton(dialog, text="Computer", variable=red_player, value="Computer").pack()
     
-        def apply_settings():  # Remove the self parameter
-            # Cancel any pending computer moves
+        def apply_settings():  
             for after_id in self.master.tk.call('after', 'info'):
                 self.master.after_cancel(int(after_id))
         
-            # Create new players before updating game logic
             new_blue_player = HumanPlayer("Blue") if blue_player.get() == "Human" else ComputerPlayer("Blue")
             new_red_player = HumanPlayer("Red") if red_player.get() == "Human" else ComputerPlayer("Red")
         
@@ -553,14 +536,11 @@ class SOSGUI:
             self.game_mode.set(new_mode.get())
             new_size = size_var.get()
         
-            # Create new game logic if size changed
             if new_size != self.board_size:
                 self.board_size = new_size
                 self.game_logic = SOSGameLogic(self.board_size)
-                # Clear all widgets in main window
                 for widget in self.master.winfo_children():
                     widget.destroy()
-                # Reinitialize the game with new size
                 self.initialize_game()
             else:
                 # Update existing game logic
@@ -573,7 +553,6 @@ class SOSGUI:
         
             dialog.destroy()
         
-            # Schedule the first computer move if it's computer's turn
             if isinstance(self.game_logic.current_player, ComputerPlayer):
                 self.master.after(1000, self.make_computer_move)
 
@@ -582,13 +561,8 @@ class SOSGUI:
 
 
     def reset_game(self):
-        # Clear canvas
         self.canvas.delete("all")
-    
-        # Reset game logic
         self.game_logic.reset_game()
-    
-        # Redraw empty grid and cells
         self.create_board()
     
         # Reset UI elements
